@@ -1,4 +1,4 @@
-SUBDIRS = contrib src po man theme-icons build tests
+SUBDIRS = . contrib src po man theme-icons build tests
 
 #capture aclocal flags for autoreconf
 ACLOCAL_AMFLAGS=$(ACLOCAL_FLAGS)
@@ -7,7 +7,11 @@ bin_SCRIPTS = monodevelop mdtool
 
 buildinfo = $(top_builddir)/build/bin/buildinfo
 
-all: vcrevision
+all: vcrevision sln_build
+all-local: sln_build
+
+sln_build:
+	xbuild Main.sln || true
 
 vcrevision:
 	@if test -d ../.git; then \

@@ -1,0 +1,44 @@
+# Set up some helper properties so we can execute the correct xbuild
+# and also have some default paths which are commonly used to store
+# built assemblies
+XBUILD=xbuild
+XBUILD_OUTPUT_BIN=/property:OutputPath=$(abs_top_builddir)/build/bin
+
+# Place all built files in the build/bin directory by default
+# Change the value of this variable if you need them elsewhere
+XBUILD_OUTPUT=$(XBUILD_OUTPUT_BIN)
+
+# By default we will build every csproj found in the current directory
+# Modify this if different (or extra) csprojs need to be processed
+CSPROJ=*.csproj
+
+# Makefiles should set the 'SKIP' variable to 'y' if the build should
+# be skipped for a particular csproj
+
+DEPTH=$(shell echo "$(top_builddir)" | tr '/' '\n' | grep -c '..')
+
+all:
+	@if test x$(SKIP) != xy -a $(DEPTH) -gt $(MAKELEVEL); then \
+	echo Building $(CSPROJ); \
+	for p in $(CSPROJ); do $(XBUILD) /verbosity:quiet $(XBUILD_OUTPUT) $(XBUILD_ARGS) $$p; done \
+	fi
+
+clean:
+	@if test x$(SKIP) != xy -a $(DEPTH) -gt $(MAKELEVEL); then \
+	echo Cleaning $(CSPROJ); \
+	for p in $(CSPROJ); do $(XBUILD) /verbosity:quiet $(XBUILD_OUTPUT) $(XBUILD_ARGS) /t:Clean $$p; done \
+	fi
+
+EXTRA_DIST = \
+        $(wildcard *.cs)            \
+        $(wildcard *.csproj)        \
+        $(wildcard */*.cs)          \
+        $(wildcard */*.csproj)      \
+        $(wildcard */*/*.cs)        \
+        $(wildcard */*/*.csproj)    \
+        $(wildcard */*/*/*.cs)      \
+        $(wildcard */*/*/*.csproj)  \
+        $(wildcard */*/*/*/*.cs)    \
+        $(wildcard */*/*/*/*.csproj)
+
+include $(top_builddir)/Makefile.include
