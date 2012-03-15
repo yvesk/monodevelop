@@ -7,11 +7,11 @@ bin_SCRIPTS = monodevelop mdtool
 
 buildinfo = $(top_builddir)/build/bin/buildinfo
 
-all: vcrevision sln_build
+all: vcrevision
 all-local: sln_build
 
 sln_build:
-	xbuild Main.sln || true
+	xbuild Main.sln /property:Configuration=DebugMac || true
 
 vcrevision:
 	@if test -d ../.git; then \

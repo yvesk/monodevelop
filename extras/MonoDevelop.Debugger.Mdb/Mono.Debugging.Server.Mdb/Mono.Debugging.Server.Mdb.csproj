@@ -174,22 +174,6 @@
     <None Include="ChangeLog" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ProjectExtensions>
-    <MonoDevelop>
-      <Properties>
-        <Deployment.LinuxDeployData generateScript="false" />
-        <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="Makefile" SyncReferences="true">
-          <BuildFilesVar Sync="true" Name="FILES" />
-          <DeployFilesVar />
-          <ResourcesVar Sync="true" Name="RESOURCES" />
-          <OthersVar />
-          <GacRefVar Sync="true" Name="REFERENCES" />
-          <AsmRefVar Sync="true" Name="REFERENCES" />
-          <ProjectRefVar Sync="true" Name="REFERENCES" />
-        </MonoDevelop.Autotools.MakefileInfo>
-      </Properties>
-    </MonoDevelop>
-  </ProjectExtensions>
   <ItemGroup>
     <EmbeddedResource Include="MdbAdaptor-2-6.cs">
       <LogicalName>MdbAdaptor-2-6.cs</LogicalName>

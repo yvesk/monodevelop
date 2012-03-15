@@ -9,7 +9,6 @@
     <OutputType>Library</OutputType>
     <AssemblyName>MonoDevelop.MonoMac</AssemblyName>
     <RootNamespace>MonoDevelop.MonoMac</RootNamespace>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,21 +32,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="MonoDevelop.Core, Version=2.0.0.0, Culture=neutral">
-      <SpecificVersion>False</SpecificVersion>
-      <Package>monodevelop</Package>
-    </Reference>
-    <Reference Include="MonoDevelop.Ide, Version=2.0.0.0, Culture=neutral">
-      <SpecificVersion>False</SpecificVersion>
-      <Package>monodevelop</Package>
-    </Reference>
     <Reference Include="System.Xml" />
-    <Reference Include="System.Core">
-    </Reference>
-    <Reference Include="MonoDevelop.DesignerSupport, Version=2.0.0.0, Culture=neutral">
-      <SpecificVersion>False</SpecificVersion>
-      <Package>monodevelop-core-addins</Package>
-    </Reference>
+    <Reference Include="System.Core" />
     <Reference Include="gtk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
@@ -57,10 +43,8 @@
     <Reference Include="gdk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="Mono.Posix">
-    </Reference>
-    <Reference Include="System.Xml.Linq">
-    </Reference>
+    <Reference Include="Mono.Posix" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="pango-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
@@ -69,21 +53,6 @@
     </Reference>
     <Reference Include="Mono.Addins, Version=0.4.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756">
       <SpecificVersion>False</SpecificVersion>
-    </Reference>
-    <Reference Include="MonoMac, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\main\build\AddIns\MonoMac.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="MonoDevelop.MacDev, Version=2.6.0.0, Culture=neutral, PublicKeyToken=null">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\main\build\AddIns\MonoDevelop.MacDev\MonoDevelop.MacDev.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="MacPlatform, Version=2.6.0.0, Culture=neutral, PublicKeyToken=null">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\main\build\AddIns\MacPlatform.dll</HintPath>
-      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -183,4 +152,26 @@ exit 1
       <Output TaskParameter="Include" ItemName="FileWrites" />
     </CreateItem>
   </Target>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\main\src\addins\MacPlatform\MacPlatform.csproj">
+      <Project>{50D6768C-C072-4E79-AFC5-C1C40767EF45}</Project>
+      <Name>MacPlatform</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\main\src\addins\MonoDevelop.MacDev\MonoDevelop.MacDev.csproj">
+      <Project>{150AC48A-E4AE-4232-9959-28D240537906}</Project>
+      <Name>MonoDevelop.MacDev</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\main\src\core\MonoDevelop.Ide\MonoDevelop.Ide.csproj">
+      <Project>{27096E7F-C91C-4AC6-B289-6897A701DF21}</Project>
+      <Name>MonoDevelop.Ide</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\main\src\core\MonoDevelop.Core\MonoDevelop.Core.csproj">
+      <Project>{7525BB88-6142-4A26-93B9-A30C6983390A}</Project>
+      <Name>MonoDevelop.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\main\src\addins\MonoDevelop.DesignerSupport\MonoDevelop.DesignerSupport.csproj">
+      <Project>{2C24D515-4A2C-445C-8419-C09231913CFA}</Project>
+      <Name>MonoDevelop.DesignerSupport</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

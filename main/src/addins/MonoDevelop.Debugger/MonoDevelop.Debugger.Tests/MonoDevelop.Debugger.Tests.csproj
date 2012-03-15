@@ -42,11 +42,6 @@
     <Compile Include="SdbStackFrameTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MonoDevelop.Debugger.Tests.TestApp\MonoDevelop.Debugger.Tests.TestApp.csproj">
-      <Project>{05EDFE55-C8D1-47E4-BB61-0BC809CD82E2}</Project>
-      <Name>MonoDevelop.Debugger.Tests.TestApp</Name>
-      <Private>False</Private>
-    </ProjectReference>
     <ProjectReference Include="..\MonoDevelop.Debugger.csproj">
       <Project>{2357AABD-08C7-4808-A495-8FF2D3CDFDB0}</Project>
       <Name>MonoDevelop.Debugger</Name>
@@ -75,6 +70,11 @@
     <ProjectReference Include="..\..\..\core\MonoDevelop.Ide\MonoDevelop.Ide.csproj">
       <Project>{27096E7F-C91C-4AC6-B289-6897A701DF21}</Project>
       <Name>MonoDevelop.Ide</Name>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="TestApp\MonoDevelop.Debugger.Tests.TestApp.csproj">
+      <Project>{05EDFE55-C8D1-47E4-BB61-0BC809CD82E2}</Project>
+      <Name>MonoDevelop.Debugger.Tests.TestApp</Name>
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
