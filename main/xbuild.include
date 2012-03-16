@@ -1,33 +1,23 @@
-# Set up some helper properties so we can execute the correct xbuild
-# and also have some default paths which are commonly used to store
-# built assemblies
 XBUILD=xbuild
-XBUILD_OUTPUT_BIN=/property:OutputPath=$(abs_top_builddir)/build/bin
+MAIN_SLN=$(top_builddir)/Main.sln
 
-# Place all built files in the build/bin directory by default
-# Change the value of this variable if you need them elsewhere
-XBUILD_OUTPUT=$(XBUILD_OUTPUT_BIN)
+if ENABLE_MACPLATFORM
+PROFILE_NAME=DebugMac
+else
+PROFILE_NAME=Debug
+endif
 
-# By default we will build every csproj found in the current directory
-# Modify this if different (or extra) csprojs need to be processed
-CSPROJ=*.csproj
+PROFILE=/property:Configuration=$(PROFILE_NAME)
 
-# Makefiles should set the 'SKIP' variable to 'y' if the build should
-# be skipped for a particular csproj
+all-local: sln_build
 
-DEPTH=$(shell echo "$(top_builddir)" | tr '/' '\n' | grep -c '..')
+clean-local: sln_clean
 
-all:
-	@if test x$(SKIP) != xy -a $(DEPTH) -gt $(MAKELEVEL); then \
-	echo Building $(CSPROJ); \
-	for p in $(CSPROJ); do $(XBUILD) /verbosity:quiet $(XBUILD_OUTPUT) $(XBUILD_ARGS) $$p; done \
-	fi
+sln_build:
+	$(XBUILD) $(MAIN_SLN) $(PROFILE)
 
-clean:
-	@if test x$(SKIP) != xy -a $(DEPTH) -gt $(MAKELEVEL); then \
-	echo Cleaning $(CSPROJ); \
-	for p in $(CSPROJ); do $(XBUILD) /verbosity:quiet $(XBUILD_OUTPUT) $(XBUILD_ARGS) /t:Clean $$p; done \
-	fi
+sln_clean:
+	$(XBUILD) $(MAIN_SLN) $(PROFILE) /t:Clean
 
 EXTRA_DIST = \
         $(wildcard *.cs)            \
@@ -41,4 +31,3 @@ EXTRA_DIST = \
         $(wildcard */*/*/*/*.cs)    \
         $(wildcard */*/*/*/*.csproj)
 
-include $(top_builddir)/Makefile.include
