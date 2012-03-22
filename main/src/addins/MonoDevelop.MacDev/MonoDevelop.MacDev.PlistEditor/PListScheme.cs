@@ -31,68 +31,113 @@ using MonoDevelop.Core;
 
 namespace MonoDevelop.MacDev.PlistEditor
 {
-	public class PListScheme
+	public partial class PListScheme
 	{
-		List<Key> keys = new List<Key> ();
+		public class Value {
+			public string Description { get; set; }
+			public string Identifier { get; set; }
+			public bool Required { get; set; }
+			public List<Value> Values { get; private set; }
+			
+			public Value ()
+			{
+				Values = new List<Value> ();
+			}
+		}
 		
+		public class DictionaryValue : Value
+		{
+			public string ArrayType { get; set; }
+			public string ValueType { get; set; }
+		}
 		
-		public IEnumerable<Key> Keys {
+		public class Key {
+			public string ArrayType { get; set; }
+			public string Description { get; set; }
+			public string Identifier { get; set; }
+			public string Type { get; set; }
+			public List<Value> Values { get; private set; }
+			
+			public Key ()
+			{
+				Values = new List<Value> ();
+			}
+		}
+	}
+	
+	public partial class PListScheme
+	{
+		public static readonly PListScheme Empty = new PListScheme () { keys = new Key [0] };
+		
+		IList<Key> keys = new List<Key> ();
+
+		public IList<Key> Keys {
 			get {
 				return keys;
 			}
 		}
-		
-		public class Value {
-			public string Identifier { get; set; }
-			public string Description { get; set; }
-		}
-		
-		public class Key {
-			public string Identifier { get; set; }
-			public string Description { get; set; }
-			public string Type { get; set; }
-			public string ArrayType { get; set; }
-			
-			public readonly List<Value> Values = new List<Value> ();
-		}
-		
+
 		public Key GetKey (string id)
 		{
 			return keys.FirstOrDefault (k => k.Identifier == id);
 		}
-		
+
 		public static PListScheme Load (XmlReader reader)
 		{
 			var result = new PListScheme ();
+			var doc = new XmlDocument ();
+			doc.Load (reader);
 			
-			XmlReadHelper.ReadList (reader, "PListScheme", delegate () {
-				switch (reader.LocalName) {
-				case "Key":
-					var key = new Key () {
-						Identifier = reader.GetAttribute ("name"),
-						Description = reader.GetAttribute ("_description"),
-						Type = reader.GetAttribute ("type"),
-						ArrayType = reader.GetAttribute ("arrayType")
-					};
-					XmlReadHelper.ReadList (reader, "Key", delegate () {
-						if (reader.LocalName == "Value") {
-							key.Values.Add (new Value () {
-								Identifier = reader.GetAttribute ("name"),
-								Description = reader.GetAttribute ("_description")
-							});
-							return true;
-						}
-						return false;
-					});
-					result.keys.Add (key);
-					return true;
-				}
-				return false;
-			});
+			foreach (XmlNode keyNode in doc.SelectNodes ("/PListScheme/*")) {
+				var key = new Key {
+					Identifier = AttributeToString (keyNode.Attributes ["name"]),
+					Description = AttributeToString (keyNode.Attributes ["_description"]),
+					Type = AttributeToString (keyNode.Attributes ["type"]),
+					ArrayType = AttributeToString (keyNode.Attributes ["arrayType"])
+				};
+				
+				if (keyNode.HasChildNodes)
+					key.Values.AddRange (ParseValues (keyNode.ChildNodes));
+				result.Keys.Add (key);
+			}
+			
 			return result;
 		}
 		
-		public static readonly PListScheme Empty = new PListScheme ();
+		static IEnumerable<Value> ParseValues (XmlNodeList nodeList)
+		{
+			List<Value> values = new List<Value> ();
+			foreach (XmlNode node in nodeList) {
+				Value value = null;
+				if (node.Name == "DictionaryValue") {
+					value = new DictionaryValue {
+						ArrayType = AttributeToString (node.Attributes ["arrayType"]),
+						ValueType = AttributeToString (node.Attributes ["valueType"])
+					};
+				} else if (node.Name == "Value") {
+					value = new Value ();
+				} else {
+					throw new NotSupportedException (string.Format ("Node of type {0} not supported as a Value", node.Name));
+				}
+				value.Description = AttributeToString (node.Attributes ["_description"]);
+				value.Identifier = AttributeToString (node.Attributes ["name"]);
+				if (node.Attributes ["required"] != null)
+					value.Required = bool.Parse (node.Attributes ["required"].Value);
+				
+				if (node.HasChildNodes)
+					value.Values.AddRange (ParseValues (node.ChildNodes));
+				
+				values.Add (value);
+			}
+			return values;
+		}
+		
+		static string AttributeToString (XmlAttribute attr)
+		{
+			if (attr == null || string.IsNullOrEmpty (attr.Value))
+				return null;
+			return attr.Value;
+		}
 	}
 }
 
