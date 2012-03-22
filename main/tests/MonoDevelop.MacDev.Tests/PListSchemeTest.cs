@@ -121,6 +121,36 @@ namespace MonoDevelop.MacDev.Tests
 		}
 		
 		[Test]
+		public void DictionaryKey_WithSubValues ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""keyname"" >
+		<DictionaryValue name = ""dict1"" valueType = ""Dictionary"" >
+			<DictionaryValue name = ""inner"" valueType = ""String"" >
+				<Value name  = ""final"" />
+			</DictionaryValue>
+		</DictionaryValue>
+	</Key>
+</PListScheme>
+");
+			Assert.AreEqual (1, scheme.Keys.Count, "#1");
+			
+			var key = scheme.GetKey ("keyname");
+			Assert.AreEqual (1, key.Values.Count, "#2");
+			
+			var dict1 = key.Values [0];
+			Assert.AreEqual ("dict1", dict1.Identifier, "#3");
+			Assert.AreEqual (1, dict1.Values.Count, "#4");
+			
+			var inner = dict1.Values [0];
+			Assert.AreEqual (1, inner.Values.Count, "#5");
+			
+			var final = inner.Values [0];
+			Assert.AreEqual ("final", final.Identifier, "#6");
+		}
+		
+		[Test]
 		public void NumberKey_WithFullValues ()
 		{
 			var scheme = Load (@"
