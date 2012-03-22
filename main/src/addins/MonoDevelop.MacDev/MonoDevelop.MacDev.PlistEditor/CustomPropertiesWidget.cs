@@ -426,19 +426,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 				}
 				pObject.SetValue (newText);
 			};
-			
-	/*		propRenderer.EditingStarted += delegate(object o, EditingStartedArgs args) {
-				TreeIter iter;
-				if (!treeStore.GetIterFromString (out iter, args.Path)) 
-					return;
-				PObject obj = (PObject)treeStore.GetValue (iter, 1);
-				if (obj is PBoolean) {
-					((PBoolean)obj).Value = !((PBoolean)obj).Value;
-					propRenderer.StopEditing (false);
-				}
-			};*/
-			
-			
+
 			treeview.AppendColumn (GettextCatalog.GetString ("Value"), propRenderer, delegate(TreeViewColumn tree_column, CellRenderer cell, TreeModel tree_model, TreeIter iter) {
 				var renderer = (CellRendererCombo)cell;
 				var obj      = (PObject)tree_model.GetValue (iter, 1);
