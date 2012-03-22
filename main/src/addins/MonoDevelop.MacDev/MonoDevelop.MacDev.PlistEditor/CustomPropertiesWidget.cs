@@ -599,65 +599,6 @@ namespace MonoDevelop.MacDev.PlistEditor
 			if (nsDictionary is PArray) 
 				AddToTree (treeStore, Gtk.TreeIter.Zero, (PArray)nsDictionary);
 		}
-		
-		/*public class CellRendererProperty : CellRenderer
-		{
-			public PObject Object {
-				get;
-				set;
-			}
-			
-			public object RenderValue {
-				get;
-				set;
-			}
-			
-			public override void GetSize (Widget widget, ref Gdk.Rectangle cell_area, out int x_offset, out int y_offset, out int width, out int height)
-			{
-				using (var layout = new Pango.Layout (widget.PangoContext)) {
-					layout.SetMarkup (RenderValue.ToString ());
-					layout.Width = -1;
-					layout.GetPixelSize (out width, out height);
-					width += (int)Xpad * 2;
-					height += (int)Ypad * 2;
-					
-					x_offset = y_offset = 0;
-				}
-			}
-			
-			protected override void Render (Gdk.Drawable window, Widget widget, Gdk.Rectangle background_area, Gdk.Rectangle cell_area, Gdk.Rectangle expose_area, CellRendererState flags)
-			{
-				using (var layout = new Pango.Layout (widget.PangoContext)) {
-					layout.SetMarkup (RenderValue.ToString ());
-					layout.Width = -1;
-					int width, height;
-					layout.GetPixelSize (out width, out height);
-					
-					int x = (int) (cell_area.X + Xpad);
-					int y = cell_area.Y + (cell_area.Height - height) / 2;
-					
-					StateType state;
-					if (flags.HasFlag (CellRendererState.Selected)) {
-						state = StateType.Selected;
-					} else {
-						state = Sensitive ? StateType.Normal : StateType.Insensitive;
-					}
-					
-					window.DrawLayout (widget.Style.TextGC (state), x, y, layout);
-				}
-			}
-			
-			public override CellEditable StartEditing (Gdk.Event ev, Widget widget, string path, Gdk.Rectangle background_area, Gdk.Rectangle cell_area, CellRendererState flags)
-			{
-				if (Object is PBoolean) {
-					((PBoolean)Object).Value = !((PBoolean)Object).Value;
-					return null;
-				}
-				
-				Gtk.Entry entry = new Gtk.Entry ();
-				return entry;
-			}
-		}*/
 	}
 }
 
