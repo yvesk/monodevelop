@@ -464,7 +464,9 @@ namespace MonoDevelop.MacDev.PlistEditor
 				}
 			}
 			
-			if (allowedValues.Count > 0 && key.Values.Count > 0) {
+			if (key.Values.Count == 0) {
+				array.Add (CreateNewObject (key.ArrayType ?? DefaultNewObjectType));
+			} else if (allowedValues.Count > 0) {
 				var newKey = allowedValues.First ();
 				if (key.ArrayType == PString.Type) {
 					array.Add (new PString (newKey.Identifier));
@@ -473,8 +475,6 @@ namespace MonoDevelop.MacDev.PlistEditor
 				} else {
 					array.Add (CreateNewObject (key.ArrayType ?? DefaultNewObjectType));
 				}
-			} else {
-				array.Add (CreateNewObject (key.ArrayType ?? DefaultNewObjectType));
 			}
 		}
 		
