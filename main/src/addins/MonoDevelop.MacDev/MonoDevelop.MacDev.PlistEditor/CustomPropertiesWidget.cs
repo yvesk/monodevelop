@@ -45,24 +45,21 @@ namespace MonoDevelop.MacDev.PlistEditor
 		Gtk.ListStore keyStore = new ListStore (typeof (string), typeof (PListScheme.Key));
 		Gtk.ListStore valueStore = new ListStore (typeof (string), typeof (string));
 		PopupTreeView treeview;
-		PListScheme scheme;
 		HashSet<PObject> expandedObjects = new HashSet<PObject> ();
 		bool showDescriptions = true;
 		
 		public bool ShowDescriptions {
 			get { return showDescriptions; }
-		}
-		
-		void SetShowDescriptions (bool value)
-		{
-			showDescriptions = value;
-			QueueDraw ();
+			private set {
+				if (showDescriptions != value) {
+					showDescriptions = value;
+					QueueDraw ();
+				}
+			}
 		}
 		
 		public PListScheme Scheme {
-			get {
-				return scheme;
-			}
+			get; private set;
 		}
 		
 		PObject nsDictionary;
@@ -166,7 +163,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 					var showDescItem = new Gtk.CheckMenuItem (GettextCatalog.GetString ("Show descriptions"));
 					showDescItem.Active = widget.ShowDescriptions;
 					showDescItem.Activated += delegate {
-						widget.SetShowDescriptions (!widget.ShowDescriptions);
+						widget.ShowDescriptions = !widget.ShowDescriptions;
 					};
 					menu.Append (showDescItem);
 				}
@@ -174,7 +171,6 @@ namespace MonoDevelop.MacDev.PlistEditor
 				IdeApp.CommandService.ShowContextMenu (this, evnt, menu, this);
 			}
 
-			
 			protected override void OnSizeRequested (ref Requisition requisition)
 			{
 				base.OnSizeRequested (ref requisition);
@@ -235,13 +231,13 @@ namespace MonoDevelop.MacDev.PlistEditor
 				window.DrawPixbuf (widget.Style.BaseGC (StateType.Normal), pixbuf, 0, 0, x, y, pixbuf.Width, pixbuf.Height, Gdk.RgbDither.None, 0, 0);
 			}
 		}
-		
+
 		public CustomPropertiesWidget (PListScheme scheme)
 		{
-			this.scheme = scheme = scheme ?? PListScheme.Empty;
+			Scheme = scheme ?? PListScheme.Empty;
 			treeview = new PopupTreeView  (this);
 			treeview.HeadersClickable = true;
-			this.PackStart (treeview, true, true, 0);
+			PackStart (treeview, true, true, 0);
 			ShowAll ();
 			
 			var keyRenderer = new CellRendererCombo ();
@@ -262,7 +258,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 				if (dict == null)
 					return;
 				
-				var key = scheme.Keys.FirstOrDefault (k => k.Identifier == args.NewText || k.Description == args.NewText);
+				var key = Scheme.Keys.FirstOrDefault (k => k.Identifier == args.NewText || k.Description == args.NewText);
 				var newKey = key != null ? key.Identifier : args.NewText;
 				
 				dict.ChangeKey (obj, newKey, key == null || obj.TypeString == key.Type ? null : CreateNewObject (key.Type));
@@ -282,7 +278,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 					return;
 				}
 				
-				var key = scheme.GetKey (id);
+				var key = Scheme.GetKey (id);
 				renderer.Editable = !(obj.Parent is PArray);
 				renderer.Sensitive = true;
 				renderer.Text = key != null && ShowDescriptions ? GettextCatalog.GetString (key.Description) : id;
@@ -323,9 +319,9 @@ namespace MonoDevelop.MacDev.PlistEditor
 					}
 
 					if (parent is PArray)
-						AddNewArrayElement ((PArray) parent, scheme.GetKey (parentKey));
+						AddNewArrayElement ((PArray) parent, Scheme.GetKey (parentKey));
 					else if (parent is PDictionary)
-						AddNewDictionaryElement ((PDictionary) parent, scheme.GetKey (parentKey));
+						AddNewDictionaryElement ((PDictionary) parent, Scheme.GetKey (parentKey));
 				}
 			};
 			
@@ -370,7 +366,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 			treeview.AppendColumn (GettextCatalog.GetString ("Type"), comboRenderer, delegate(TreeViewColumn tree_column, CellRenderer cell, TreeModel tree_model, TreeIter iter) {
 				var renderer = (CellRendererCombo)cell;
 				string id = (string)tree_model.GetValue (iter, 0) ?? "";
-				var key   = scheme.GetKey (id);
+				var key   = Scheme.GetKey (id);
 				var obj   = (PObject)tree_model.GetValue (iter, 1);
 				if (obj == null) {
 					renderer.Editable = false;
