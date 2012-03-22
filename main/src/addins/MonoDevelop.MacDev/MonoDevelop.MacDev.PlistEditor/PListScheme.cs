@@ -33,35 +33,58 @@ namespace MonoDevelop.MacDev.PlistEditor
 {
 	public partial class PListScheme
 	{
-		public class Value {
-			public string Description { get; set; }
-			public string Identifier { get; set; }
-			public bool Required { get; set; }
-			public List<Value> Values { get; private set; }
-			
-			public Value ()
-			{
-				Values = new List<Value> ();
-			}
-		}
-		
-		public class DictionaryValue : Value
+		public abstract class SchemaItem
 		{
-			public string ArrayType { get; set; }
-			public string ValueType { get; set; }
-		}
-		
-		public class Key {
 			public string ArrayType { get; set; }
 			public string Description { get; set; }
 			public string Identifier { get; set; }
 			public string Type { get; set; }
 			public List<Value> Values { get; private set; }
 			
-			public Key ()
+			public SchemaItem ()
 			{
 				Values = new List<Value> ();
 			}
+			
+			public PObject Create ()
+			{
+				if (Type == PDictionary.Type) {
+					var dictionary = new PDictionary ();
+					foreach (var v in Values) {
+						if (v.Required)
+							dictionary.Add (v.Identifier, v.Create ());
+					}
+					return dictionary;
+				} else if (Type == PArray.Type) {
+					var array = new PArray ();
+					foreach (var v in Values) {
+						if (v.Required)
+							array.Add (v.Create ());
+					}
+					return array;
+				} else if (Values.Any ()){
+					return Values.First ().Create ();
+				} else {
+					var obj = PObject.Create (Type);
+					if (!string.IsNullOrEmpty (Identifier) && !(this is Key))
+						obj.SetValue (Identifier);
+					return obj;
+				}
+			}
+		}
+		
+		public class Value : SchemaItem {
+
+			public bool Required { get; set; }
+			
+			public Value ()
+			{
+				
+			}
+		}
+
+		public class Key : SchemaItem {
+
 		}
 	}
 	
@@ -97,37 +120,34 @@ namespace MonoDevelop.MacDev.PlistEditor
 				};
 				
 				if (keyNode.HasChildNodes)
-					key.Values.AddRange (ParseValues (keyNode.ChildNodes));
+					key.Values.AddRange (ParseValues (key.ArrayType ?? key.Type, keyNode.ChildNodes));
 				result.Keys.Add (key);
 			}
 			
 			return result;
 		}
 		
-		static IEnumerable<Value> ParseValues (XmlNodeList nodeList)
+		static IEnumerable<Value> ParseValues (string type, XmlNodeList nodeList)
 		{
 			List<Value> values = new List<Value> ();
 			foreach (XmlNode node in nodeList) {
-				Value value = null;
-				if (node.Name == "DictionaryValue") {
-					value = new DictionaryValue {
-						ArrayType = AttributeToString (node.Attributes ["arrayType"]),
-						ValueType = AttributeToString (node.Attributes ["valueType"])
-					};
-				} else if (node.Name == "Value") {
-					value = new Value ();
-				} else {
+				if (node.Name != "Value")
 					throw new NotSupportedException (string.Format ("Node of type {0} not supported as a Value", node.Name));
-				}
-				value.Description = AttributeToString (node.Attributes ["_description"]);
-				value.Identifier = AttributeToString (node.Attributes ["name"]);
+				
+				Value v = new Value {
+					ArrayType = AttributeToString (node.Attributes ["arrayType"]),
+					Description = AttributeToString (node.Attributes ["_description"]),
+					Identifier = AttributeToString (node.Attributes ["name"]),
+					Type = AttributeToString (node.Attributes ["type"]) ?? type
+				};
+				
 				if (node.Attributes ["required"] != null)
-					value.Required = bool.Parse (node.Attributes ["required"].Value);
+					v.Required = bool.Parse (node.Attributes ["required"].Value);
 				
 				if (node.HasChildNodes)
-					value.Values.AddRange (ParseValues (node.ChildNodes));
+					v.Values.AddRange (ParseValues (v.ArrayType ?? v.Type, node.ChildNodes));
 				
-				values.Add (value);
+				values.Add (v);
 			}
 			return values;
 		}

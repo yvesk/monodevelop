@@ -62,15 +62,207 @@ namespace MonoDevelop.MacDev.Tests
 			Assert.AreEqual ("Array", key.Type, "#1");
 			Assert.IsNull (key.ArrayType, "#2");
 		}
+		
+		[Test]
+		public void CreateKey_Dictionary_NoValue ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""keyname"" type = ""Dictionary"" />
+</PListScheme>");
+			
+			var obj = scheme.Keys [0].Create ();
+			Assert.IsInstanceOf<PDictionary> (obj, "#1");
+			Assert.AreEqual (0, ((PDictionary)obj).Count, "#2");
+		}
+		
+		[Test]
+		public void CreateKey_Dictionary_WithValues ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""keyname"" type = ""Dictionary"">
+		<Value name = ""key1"" type = ""Number"" />
+		<Value name = ""key2"" type = ""Array"" />
+	</Key>
+</PListScheme>");
+			
+			var obj = scheme.Keys [0].Create ();
+			Assert.IsInstanceOf<PDictionary> (obj, "#1");
+			Assert.AreEqual (0, ((PDictionary)obj).Count, "#2");
+		}
+		
+		[Test]
+		public void CreateKey_Dictionary_WithRequiredValues ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""keyname"" type = ""Dictionary"">
+		<Value name = ""key1"" type = ""Number"" required = ""True"" />
+		<Value name = ""key2"" type = ""Array"" required = ""True"" />
+	</Key>
+</PListScheme>");
+			
+			var obj = scheme.Keys [0].Create ();
+			Assert.IsInstanceOf<PDictionary> (obj, "#1");
+			Assert.AreEqual (2, ((PDictionary)obj).Count, "#2");
+		}
+		
+		[Test]
+		public void CreateKey_Dictionary_WithRequiredValuesAndSubvalues ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""keyname"" type = ""Dictionary"">
+		<Value name = ""key1"" type = ""Number"" required = ""True"">
+			<Value name = ""5"" />
+			<Value name = ""7"" />
+		</Value>
+		<Value name = ""key2"" type = ""Array"" arrayType = ""String"" required = ""True"">
+			<Value name = ""str1"" required = ""True"" />
+			<Value name = ""str2"" />
+			<Value name = ""str3"" required = ""True"" />
+		</Value>
+	</Key>
+</PListScheme>");
+			
+			var obj = scheme.Keys [0].Create ();
+			Assert.IsInstanceOf<PDictionary> (obj, "#1");
+			
+			var dict = (PDictionary) obj;
+			Assert.AreEqual (2, dict.Count, "#2");
+			Assert.IsInstanceOf<PNumber> (dict ["key1"], "#3");
+			Assert.IsInstanceOf<PArray> (dict ["key2"], "#4");
+			
+			var val1 = dict.Get<PNumber> ("key1");
+			Assert.AreEqual (5, val1.Value, "#5");
+			
+			var val2 = dict.Get<PArray> ("key2");
+			Assert.AreEqual (2, val2.Count, "#6");
+			Assert.AreEqual ("str1", ((PString) val2[0]).Value, "#7");
+			Assert.AreEqual ("str3", ((PString) val2[1]).Value, "#8");
+		}
+		
+		[Test]
+		public void CreateKey_NumberArray_NoValue ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""keyname"" type = ""Array"" arrayType = ""Number"" />
+</PListScheme>");
+			
+			var obj = scheme.Keys [0].Create ();
+			Assert.IsInstanceOf<PArray> (obj, "#1");
+			Assert.AreEqual (0, ((PArray)obj).Count, "#2");
+		}
+		
+		[Test]
+		public void CreateKey_NumberArray_WithValues ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""keyname"" type = ""Array"" arrayType= ""Number"" >
+		<Value name = ""6"" description = ""bar"" />
+		<Value name = ""8"" description = ""bar"" />
+	</Key>
+</PListScheme>");
+			
+			var obj = scheme.Keys [0].Create ();
+			Assert.IsInstanceOf<PArray> (obj, "#1");
+			Assert.AreEqual (0, ((PArray)obj).Count, "#2");
+		}
+		
+		[Test]
+		public void CreateKey_NumberArray_WithRequiredValues ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""keyname"" type = ""Array"" arrayType= ""Number"" >
+		<Value name = ""6"" description = ""bar"" required = ""True"" />
+		<Value name = ""8"" description = ""bar"" />
+		<Value name = ""12"" description = ""bar"" required = ""True"" />
+	</Key>
+</PListScheme>");
+			
+			var obj = scheme.Keys [0].Create ();
+			Assert.IsInstanceOf<PArray> (obj, "#1");
+			
+			var array = (PArray)obj;
+			Assert.AreEqual (2, array.Count, "#2");
+			
+			Assert.IsInstanceOf<PNumber> (array[0], "#3");
+			Assert.IsInstanceOf<PNumber> (array[1], "#4");
+			
+			Assert.AreEqual (6, ((PNumber)array[0]).Value, "#5");
+			Assert.AreEqual (12, ((PNumber)array[1]).Value, "#6");
+		}
 
+		[Test]
+		public void CreateKey_Number_NoValue ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""keyname"" type = ""Number"" />
+</PListScheme>");
+			
+			var obj = scheme.Keys [0].Create ();
+			Assert.IsInstanceOf<PNumber> (obj, "#1");
+			Assert.AreEqual (0, ((PNumber)obj).Value, "#2");
+		}
+		
+		[Test]
+		public void CreateKey_Number_WithValue ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""keyname"" type = ""Number"">
+		<Value name = ""6"" description = ""bar"" />
+		<Value name = ""8"" description = ""bar"" />
+	</Key>
+</PListScheme>");
+			
+			var obj = scheme.Keys [0].Create ();
+			Assert.IsInstanceOf<PNumber> (obj, "#1");
+			Assert.AreEqual (6, ((PNumber)obj).Value, "#2");
+		}
+
+		[Test]
+		public void CreateKey_String_NoValue ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""keyname"" type = ""String"" />
+</PListScheme>");
+			
+			var obj = scheme.Keys [0].Create ();
+			Assert.IsInstanceOf<PString> (obj, "#1");
+			Assert.AreEqual ("", ((PString)obj).Value, "#2");
+		}
+		
+		[Test]
+		public void CreateKey_String_WithValue ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""keyname"" type = ""String"">
+		<Value name = ""foo"" description = ""bar"" />
+		<Value name = ""baz"" description = ""bip"" />
+	</Key>
+</PListScheme>");
+			
+			var obj = scheme.Keys [0].Create ();
+			Assert.IsInstanceOf<PString> (obj, "#1");
+			Assert.AreEqual ("foo", ((PString)obj).Value, "#2");
+		}
+		
 		[Test]
 		public void DictionaryKey_ValueDescriptions ()
 		{
 			var scheme = Load (@"
 <PListScheme>
 	<Key name = ""keyname"" type = ""Dictionary"" >
-		<DictionaryValue _description = ""Foo""  />
-		<DictionaryValue _description = ""Bar""  />
+		<Value _description = ""Foo""  />
+		<Value _description = ""Bar""  />
 	</Key>
 </PListScheme>
 ");
@@ -85,7 +277,7 @@ namespace MonoDevelop.MacDev.Tests
 			var scheme = Load (@"
 <PListScheme>
 	<Key name = ""keyname"" type = ""Dictionary"" >
-		<DictionaryValue name = ""dict1"" valueType = ""String"" required=""True""  />
+		<Value name = ""dict1"" type = ""String"" required=""True""  />
 	</Key>
 </PListScheme>
 ");
@@ -98,9 +290,9 @@ namespace MonoDevelop.MacDev.Tests
 		{
 			var scheme = Load (@"
 <PListScheme>
-	<Key name = ""keyname"" >
-		<DictionaryValue name = ""dict1"" valueType = ""String""  />
-		<DictionaryValue name = ""dict2"" valueType = ""Dictionary"" />
+	<Key name = ""keyname"" type = ""Dictionary"" >
+		<Value name = ""dict1"" type = ""String""  />
+		<Value name = ""dict2"" type = ""Dictionary"" />
 	</Key>
 </PListScheme>
 ");
@@ -108,16 +300,16 @@ namespace MonoDevelop.MacDev.Tests
 			
 			var key = scheme.GetKey ("keyname");
 			Assert.AreEqual (2, key.Values.Count, "#2");
-			Assert.IsInstanceOf<PListScheme.DictionaryValue> (key.Values [0], "#3");
-			Assert.IsInstanceOf<PListScheme.DictionaryValue> (key.Values [1], "#4");
+			Assert.IsInstanceOf<PListScheme.Value> (key.Values [0], "#3");
+			Assert.IsInstanceOf<PListScheme.Value> (key.Values [1], "#4");
 			
-			var first = (PListScheme.DictionaryValue) key.Values [0];
+			var first = (PListScheme.Value) key.Values [0];
 			Assert.AreEqual ("dict1", first.Identifier, "#5");
-			Assert.AreEqual ("String", first.ValueType, "#6");
+			Assert.AreEqual ("String", first.Type, "#6");
 			
-			var second = (PListScheme.DictionaryValue) key.Values [1];
+			var second = (PListScheme.Value) key.Values [1];
 			Assert.AreEqual ("dict2", second.Identifier, "#7");
-			Assert.AreEqual ("Dictionary", second.ValueType, "#8");
+			Assert.AreEqual ("Dictionary", second.Type, "#8");
 		}
 		
 		[Test]
@@ -125,12 +317,12 @@ namespace MonoDevelop.MacDev.Tests
 		{
 			var scheme = Load (@"
 <PListScheme>
-	<Key name = ""keyname"" >
-		<DictionaryValue name = ""dict1"" valueType = ""Dictionary"" >
-			<DictionaryValue name = ""inner"" valueType = ""String"" >
+	<Key name = ""keyname"" type = ""Dictionary"" >
+		<Value name = ""dict1"" type = ""Dictionary"" >
+			<Value name = ""inner"" type = ""String"" >
 				<Value name  = ""final"" />
-			</DictionaryValue>
-		</DictionaryValue>
+			</Value>
+		</Value>
 	</Key>
 </PListScheme>
 ");
@@ -155,7 +347,7 @@ namespace MonoDevelop.MacDev.Tests
 		{
 			var scheme = Load (@"
 <PListScheme>
-	<Key name = ""keyname"" _description = ""text"" type = ""Number"" >
+	<Key name = ""keyname"" type = ""Number"" _description = ""text"" >
 		<Value name = ""1"" /> 
 		<Value name = ""2"" /> 
 	</Key>
@@ -172,7 +364,7 @@ namespace MonoDevelop.MacDev.Tests
 		{
 			var scheme = Load (@"
 <PListScheme>
-	<Key name = ""keyname"" _description = ""text"" type = ""String""/>
+	<Key name = ""keyname"" type = ""String"" _description = ""text"" />
 </PListScheme>");
 			Assert.AreEqual (1, scheme.Keys.Count, "#1");
 			
@@ -189,8 +381,8 @@ namespace MonoDevelop.MacDev.Tests
 		{
 			var scheme = Load (@"
 <PListScheme>
-	<Key name = ""keyname1"" _description = ""text1"" type = ""String""/>
-	<Key name = ""keyname2"" _description = ""text2"" type = ""String""/>
+	<Key name = ""keyname1"" type = ""String"" _description = ""text1"" />
+	<Key name = ""keyname2"" type = ""String"" _description = ""text2"" />
 </PListScheme>");
 			Assert.AreEqual (2, scheme.Keys.Count, "#1");
 			
@@ -206,7 +398,7 @@ namespace MonoDevelop.MacDev.Tests
 		{
 			var scheme = Load (@"
 <PListScheme>
-	<Key name = ""keyname"" _description = ""text"" type = ""String"" >
+	<Key name = ""keyname"" type = ""String"" _description = ""text"" >
 		<Value name = ""ValidValue1"" _description = ""desc1"" /> 
 		<Value name = ""ValidValue2"" _description = ""desc2"" required=""True"" /> 
 	</Key>
@@ -226,7 +418,7 @@ namespace MonoDevelop.MacDev.Tests
 		{
 			var scheme = Load (@"
 <PListScheme>
-	<Key name = ""keyname"" _description = ""text"" type = ""String"" >
+	<Key name = ""keyname"" type = ""String"" _description = ""text"" >
 		<Value name = ""ValidValue1"" /> 
 	</Key>
 </PListScheme>");

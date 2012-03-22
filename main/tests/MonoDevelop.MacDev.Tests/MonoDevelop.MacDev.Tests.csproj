@@ -34,15 +34,18 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Xml" />
+    <Reference Include="MonoMac, Version=0.0.0.0, Culture=neutral">
+      <Package>monodevelop-core-mac-addins</Package>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Compile Include="PListSchemeTest.cs" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\addins\MonoDevelop.MacDev\MonoDevelop.MacDev.csproj">
       <Project>{150AC48A-E4AE-4232-9959-28D240537906}</Project>
       <Name>MonoDevelop.MacDev</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="PListSchemeTest.cs" />
   </ItemGroup>
 </Project>

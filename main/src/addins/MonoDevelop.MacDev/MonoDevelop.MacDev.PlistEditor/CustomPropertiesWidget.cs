@@ -72,28 +72,6 @@ namespace MonoDevelop.MacDev.PlistEditor
 			RefreshTree ();
 		}
 		
-		public static PObject CreateNewObject (string type)
-		{
-			switch (type) {
-			case "Array":
-				return new PArray ();
-			case "Dictionary":
-				return new PDictionary ();
-			case "Boolean":
-				return new PBoolean (true);
-			case "Data":
-				return new PData (new byte[0]);
-			case "Date":
-				return new PDate (DateTime.Now);
-			case "Number":
-				return new PNumber (0);
-			case "String":
-				return new PString ("");
-			}
-			LoggingService.LogError ("Unknown pobject type:" + type);
-			return new PString ("<error>");
-		}
-		
 		class PopupTreeView : MonoDevelop.Components.ContextMenuTreeView
 		{
 			CustomPropertiesWidget widget;
@@ -158,7 +136,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 					};
 				}
 				
-				if (widget.scheme != null) {
+				if (widget.Scheme != null) {
 					menu.Append (new Gtk.SeparatorMenuItem ());
 					var showDescItem = new Gtk.CheckMenuItem (GettextCatalog.GetString ("Show descriptions"));
 					showDescItem.Active = widget.ShowDescriptions;
@@ -261,7 +239,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 				var key = Scheme.Keys.FirstOrDefault (k => k.Identifier == args.NewText || k.Description == args.NewText);
 				var newKey = key != null ? key.Identifier : args.NewText;
 				
-				dict.ChangeKey (obj, newKey, key == null || obj.TypeString == key.Type ? null : CreateNewObject (key.Type));
+				dict.ChangeKey (obj, newKey, key == null || obj.TypeString == key.Type ? null : PObject.Create (key.Type));
 			};
 			var col = new TreeViewColumn ();
 			col.Resizable = true;
@@ -360,7 +338,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 				
 				PObject oldObj = (PObject)treeStore.GetValue (selIter, 1);
 				if (oldObj != null && oldObj.TypeString != args.NewText)
-					oldObj.Replace (CreateNewObject (args.NewText));
+					oldObj.Replace (PObject.Create (args.NewText));
 			};
 			
 			treeview.AppendColumn (GettextCatalog.GetString ("Type"), comboRenderer, delegate(TreeViewColumn tree_column, CellRenderer cell, TreeModel tree_model, TreeIter iter) {
@@ -441,7 +419,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 		void AddNewArrayElement (PArray array, PListScheme.Key key)
 		{
 			if (key == null) {
-				array.Add (CreateNewObject (DefaultNewObjectType));
+				array.Add (PObject.Create (DefaultNewObjectType));
 				return;
 			}
 			
@@ -461,7 +439,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 			}
 			
 			if (key.Values.Count == 0) {
-				array.Add (CreateNewObject (key.ArrayType ?? DefaultNewObjectType));
+				array.Add (PObject.Create (key.ArrayType ?? DefaultNewObjectType));
 			} else if (allowedValues.Count > 0) {
 				var newKey = allowedValues.First ();
 				if (key.ArrayType == PString.Type) {
@@ -469,7 +447,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 				} else if (key.ArrayType == PNumber.Type) {
 					array.Add (new PNumber (int.Parse (newKey.Identifier)));
 				} else {
-					array.Add (CreateNewObject (key.ArrayType ?? DefaultNewObjectType));
+					array.Add (PObject.Create (key.ArrayType ?? DefaultNewObjectType));
 				}
 			}
 		}
@@ -586,8 +564,8 @@ namespace MonoDevelop.MacDev.PlistEditor
 		void RefreshTree ()
 		{
 			keyStore.Clear ();
-			if (scheme != null) {
-				var sortedKeys = new List<PListScheme.Key> (scheme.Keys);
+			if (Scheme != null) {
+				var sortedKeys = new List<PListScheme.Key> (Scheme.Keys);
 				sortedKeys.Sort ((x, y) => x.Description.CompareTo (y.Description));
 				foreach (var key in sortedKeys)
 					keyStore.AppendValues (key.Description, key);
