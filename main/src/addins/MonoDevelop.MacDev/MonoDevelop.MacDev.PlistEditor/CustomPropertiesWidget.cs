@@ -255,12 +255,17 @@ namespace MonoDevelop.MacDev.PlistEditor
 			
 			var addRenderer = new CellRendererButton (ImageService.GetPixbuf ("gtk-add", IconSize.Menu));
 			addRenderer.Clicked += AddElement;
-			
 			col.PackEnd (addRenderer, false);
 			col.SetCellDataFunc (addRenderer, delegate(TreeViewColumn tree_column, CellRenderer cell, TreeModel tree_model, TreeIter iter) {
 				addRenderer.Visible = treeview.Selection.IterIsSelected (iter) && AddKeyNode.Equals (treeStore.GetValue (iter, 0));
 			});
 			treeview.AppendColumn (col);
+			
+			treeview.RowActivated += delegate(object o, RowActivatedArgs args) {
+				TreeIter iter;
+				if (treeStore.GetIter (out iter, args.Path) && AddKeyNode.Equals (treeStore.GetValue (iter, 0)))
+					AddElement (o, EventArgs.Empty);
+			};
 
 			var comboRenderer = new CellRendererCombo ();
 			
