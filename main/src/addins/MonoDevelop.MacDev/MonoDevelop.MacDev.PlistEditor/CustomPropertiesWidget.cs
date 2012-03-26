@@ -46,7 +46,6 @@ namespace MonoDevelop.MacDev.PlistEditor
 		Gtk.ListStore valueStore = new ListStore (typeof (string), typeof (string));
 		PopupTreeView treeview;
 		bool showDescriptions = true;
-		Dictionary<PObject, PListScheme.SchemaItem> CurrentTree { get; set; }
 	
 		public bool ShowDescriptions {
 			get { return showDescriptions; }
@@ -57,7 +56,11 @@ namespace MonoDevelop.MacDev.PlistEditor
 				}
 			}
 		}
-		
+
+		Dictionary<PObject, PListScheme.SchemaItem> CurrentTree {
+			get; set;
+		}
+
 		public PListScheme Scheme {
 			get; private set;
 		}
@@ -519,18 +522,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 			else
 				return treeStore.AppendValues (iter, AddKeyNode, null);
 		}
-		
-		void RemoveChildren (Gtk.TreeIter iter)
-		{
-			if (TreeIter.Zero.Equals (iter)) {
-				treeStore.Clear ();
-				return;
-			}
-			Gtk.TreeIter child;
-			while (treeStore.IterChildren (out child, iter))
-				treeStore.Remove (ref child);
-		}
-		
+
 		void RefreshKeyStore ()
 		{
 			var sortedKeys = new List<PListScheme.Key> (Scheme.Keys);
