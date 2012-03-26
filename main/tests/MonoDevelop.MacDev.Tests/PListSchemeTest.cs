@@ -429,6 +429,109 @@ namespace MonoDevelop.MacDev.Tests
 			Assert.AreEqual ("ValidValue1", key.Values [0].Identifier, "#3");
 			Assert.IsNull (key.Values [0].Description, "#4");
 		}
+		
+		[Test]
+		public void WalkScheme_PArrayKey_RequiredValues ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""key1"" type = ""Array"" arrayType = ""Dictionary"" >
+		<Value required = ""True"" >
+			<Value name = ""val1"" type = ""Number"" required = ""True"" />
+			<Value name = ""val2"" type = ""Array"" required = ""True"" />
+		</Value>
+	</Key>
+</PListScheme>");
+			
+			var key = scheme.Keys [0];
+			var root = new PDictionary ();
+			var tree = (PArray) key.Create ();
+			root.Add ("key1", tree);
+			
+			var result = PListScheme.Match (root, scheme);
+			Assert.AreEqual (4, result.Count);
+			Assert.AreSame (result [tree], key, "#2");
+			
+			var dict = (PDictionary) tree[0];
+			Assert.AreEqual (result [dict], key.Values [0], "#3");
+			
+			var val1 = dict ["val1"];
+			Assert.AreSame (result [val1], key.Values [0].Values [0], "#4");
+			
+			var val2 = dict ["val2"];
+			Assert.AreSame (result [val2], key.Values [0].Values [1], "#5");
+		}
+		
+		[Test]
+		public void WalkScheme_PDictionaryKey_RequiredValues ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""key1"" type = ""Dictionary"">
+		<Value name = ""val1"" type = ""Number"" required = ""True"" />
+		<Value name = ""val2"" type = ""Array"" required = ""True"" />
+	</Key>
+</PListScheme>");
+			
+			var key = scheme.Keys [0];
+			var root = new PDictionary ();
+			var tree = (PDictionary) key.Create ();
+			root.Add ("key1", tree);
+			
+			var result = PListScheme.Match (root, scheme);
+			Assert.AreEqual (3, result.Count);
+			Assert.AreSame (result [tree], key, "#2");
+			
+			var val1 = tree ["val1"];
+			Assert.AreSame (result [val1], key.Values [0], "#3");
+			
+			var val2 = tree ["val2"];
+			Assert.AreSame (result [val2], key.Values [1], "#4");
+		}
+		
+		[Test]
+		public void WalkScheme_PNumberKey_WithValues ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""key1"" type = ""Number"">
+		<Value name = ""0"" />
+		<Value name = ""1"" />
+		<Value name = ""2"" />
+	</Key>
+</PListScheme>");
+			
+			var key = scheme.Keys [0];
+			var root = new PDictionary ();
+			var tree = key.Create ();
+			root.Add ("key1", tree);
+			
+			var result = PListScheme.Match (root, scheme);
+			Assert.AreEqual (1, result.Count);
+			Assert.AreSame (result [tree], key, "#2");
+		}
+		
+		[Test]
+		public void WalkScheme_PStringKey_WithValues ()
+		{
+			var scheme = Load (@"
+<PListScheme>
+	<Key name = ""key1"" type = ""String"">
+		<Value name = ""A"" />
+		<Value name = ""B"" />
+		<Value name = ""C"" />
+	</Key>
+</PListScheme>");
+			
+			var key = scheme.Keys [0];
+			var root = new PDictionary ();
+			var tree = key.Create ();
+			root.Add ("key1", tree);
+			
+			var result = PListScheme.Match (root, scheme);
+			Assert.AreEqual (1, result.Count);
+			Assert.AreSame (result [tree], key, "#2");
+		}
 
 		PListScheme Load (string value)
 		{

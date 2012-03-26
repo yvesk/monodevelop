@@ -39,7 +39,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 			public string Description { get; set; }
 			public string Identifier { get; set; }
 			public string Type { get; set; }
-			public List<Value> Values { get; private set; }
+			public List<Value> Values { get; set; }
 			
 			public SchemaItem ()
 			{
@@ -84,7 +84,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 		}
 
 		public class Key : SchemaItem {
-
+			public static readonly Key Empty = new Key { };
 		}
 	}
 	
@@ -126,6 +126,49 @@ namespace MonoDevelop.MacDev.PlistEditor
 			
 			return result;
 		}
+		
+		public static Dictionary<PObject, SchemaItem> Match (PDictionary dictionary, PListScheme scheme)
+		{
+			Dictionary<PObject, SchemaItem> results = new Dictionary<PObject, SchemaItem> ();
+			foreach (var kp in dictionary) {
+				var key = scheme.GetKey (kp.Key);
+				if (key == null) {
+					results.Add (kp.Value, key);
+					continue;
+				}
+				
+				// Every array element is produced by instantiating a copy of this value
+				if (key.Type == PArray.Type && key.Values.Count == 1 && key.Values [0].Identifier == null) {
+					results.Add (kp.Value, key);
+					foreach (var v in ((PArray) kp.Value)) {
+						Match (v, key.Values [0], results);
+					}
+				} else if (key.Type == PArray.Type) {
+					Match (kp.Value, key, results);
+				} else if (key.Type == PDictionary.Type) {
+					Match (kp.Value, key, results);
+				} else {
+					results.Add (kp.Value, key);
+				}
+			}
+			return results;
+		}
+		
+		static void Match (PObject o, SchemaItem value, Dictionary<PObject, SchemaItem> results)
+		{
+			results.Add (o, value);
+			if (o is PDictionary) {
+				foreach (var kp in ((PDictionary) o)) {
+					var subValue = value.Values.Where (k => k.Identifier == kp.Key).FirstOrDefault () ?? value;
+					Match (kp.Value, subValue, results);
+				}
+			} else if (o is PArray) {
+				foreach (var v in ((PArray) o)) {
+					Match (v, value, results);
+				}
+			}
+		}
+		
 		
 		static IEnumerable<Value> ParseValues (string type, XmlNodeList nodeList)
 		{
