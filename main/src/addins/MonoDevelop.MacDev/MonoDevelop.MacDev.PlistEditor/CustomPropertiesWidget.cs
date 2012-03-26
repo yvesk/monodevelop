@@ -559,17 +559,14 @@ namespace MonoDevelop.MacDev.PlistEditor
 		
 		void RemoveOldEntries (Dictionary<PObject, PListScheme.SchemaItem> oldTree, Dictionary<PObject, PListScheme.SchemaItem> newTree)
 		{
-			var toRemove = new List<PObject> ();
-			foreach (var key in oldTree.Keys)
-				if (!newTree.ContainsKey (key))
-					toRemove.Add (key);
+			var toRemove = oldTree.Keys.Where (k => !newTree.ContainsKey (k)).ToArray ();
 			
 			TreeIter iter;
 			if (treeStore.GetIterFirst (out iter))
 				RemovePObjects (iter, toRemove);
 		}
 		
-		void RemovePObjects (TreeIter iter, List<PObject> toRemove)
+		void RemovePObjects (TreeIter iter, IList<PObject> toRemove)
 		{
 			do {
 				if (toRemove.Contains (treeStore.GetValue (iter, 1))) {
