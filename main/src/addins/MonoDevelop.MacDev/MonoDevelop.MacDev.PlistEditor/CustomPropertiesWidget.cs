@@ -218,7 +218,7 @@ namespace MonoDevelop.MacDev.PlistEditor
 			
 			RefreshKeyStore ();
 			PackStart (treeview, true, true, 0);
-			AddCreateNewEntry (TreeIter.Zero);
+			FindOrAddNewEntry (TreeIter.Zero);
 			ShowAll ();
 
 			var keyRenderer = new CellRendererCombo ();
@@ -453,14 +453,6 @@ namespace MonoDevelop.MacDev.PlistEditor
 
 		Dictionary<PObject, Gtk.TreeIter> iterTable = new Dictionary<PObject, Gtk.TreeIter> ();
 
-		TreeIter AddCreateNewEntry (Gtk.TreeIter iter)
-		{
-			if (iter.Equals (TreeIter.Zero)) {
-				return treeStore.AppendValues (AddKeyNode, null);
-			}
-			return treeStore.AppendValues (iter, AddKeyNode, null);
-		}
-
 		void AddToTree (Gtk.TreeStore treeStore, Gtk.TreeIter iter, PDictionary dict, Dictionary<PObject, PListScheme.SchemaItem> tree)
 		{
 			iterTable[dict] = iter;
@@ -524,7 +516,11 @@ namespace MonoDevelop.MacDev.PlistEditor
 						return subIter;
 				} while (treeStore.IterNext (ref subIter));
 			}
-			return AddCreateNewEntry (iter);
+			
+			if (iter.Equals (TreeIter.Zero))
+				return treeStore.AppendValues (AddKeyNode, null);
+			else
+				return treeStore.AppendValues (iter, AddKeyNode, null);
 		}
 		
 		void RemoveChildren (Gtk.TreeIter iter)
